@@ -3,12 +3,12 @@ package main
 import (
 	"cloud.google.com/go/firestore"
 	"context"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"google.golang.org/api/iterator"
 	"log"
 	"net/http"
-	"fmt"
-	"google.golang.org/api/iterator"
 )
 
 func main() {
@@ -16,7 +16,7 @@ func main() {
 
 	r.POST("/url", postUrl)
 	r.GET("/urls", getUrls)
-	// r.DELETE("/url", deleteUrl)
+	r.DELETE("/url", deleteUrl)
 	// r.GET("/search", getSearch)
 	r.Run()
 }
@@ -42,7 +42,27 @@ type PostUrlBody struct {
 
 type Url struct {
 	Url string `json:"url" binding:"required"`
-	Id string `json:"id" binding:"required"`
+	Id  string `json:"id" binding:"required"`
+}
+
+func deleteUrl(c *gin.Context) {
+	// get the input
+	id, ok := c.GetQuery("id")
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "id is a required query param"})
+		return
+	}
+
+	// get the client
+	ctx := context.Background()
+	client := createClient(ctx)
+	defer client.Close()
+
+	// delete the document
+	_, err := client.Collection("urls").Doc(id).Delete(ctx)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
 }
 
 func getUrls(c *gin.Context) {
@@ -61,7 +81,7 @@ func getUrls(c *gin.Context) {
 	fmt.Println(userId)
 
 	// get the urls
-	var urls []Url
+	urls := make([]Url, 0)
 	iter := client.Collection("urls").Where("user_id", "==", userId).Documents(ctx)
 	for {
 		doc, err := iter.Next()
@@ -74,9 +94,9 @@ func getUrls(c *gin.Context) {
 			return
 		}
 		data := doc.Data()
-		urls = append(urls, Url {
+		urls = append(urls, Url{
 			Url: data["user_id"].(string),
-			Id: data["id"].(string),
+			Id:  data["id"].(string),
 		})
 	}
 	c.JSON(http.StatusOK, gin.H{"urls": urls})
