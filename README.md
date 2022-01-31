@@ -29,11 +29,11 @@ All requests are associated with a `user_id`. When managing urls or searching, t
 
 **URL Params**
 
-**Required** : `user_id`
+- **Required** : `user_id`
 
 **Response Body**
 
-The returned content can be used for display.  The `id` field is needed for the DELETE operation.
+- The returned content can be used for display.  The `id` field is needed for the DELETE operation.
 
 ## Example
 
@@ -68,13 +68,13 @@ Ex: https://kv-multi-g6wckimtwq-uc.a.run.app/urls?user_id=chris
 
 **URL Params**
 
-**Required** : `user_id`
+- **Required** : `user_id`
 
-**Required** : `q`
+- **Required** : `q`
 
 **Response Body**
 
-`occurrences` is the number of time `q` appears in either the title or the content of the url. `example_text` is a snippet of the content in which `q` appears
+- `occurrences` is the number of time `q` appears in either the title or the content of the url. `example_text` is a snippet of the content in which `q` appears
 
 `GET /search?user_id=chris&q=bolognese`
 Ex: https://kv-multi-g6wckimtwq-uc.a.run.app/search?user_id=chris&q=bolognese
@@ -107,9 +107,9 @@ Ex: https://kv-multi-g6wckimtwq-uc.a.run.app/search?user_id=chris&q=bolognese
 
 **Request Body Fields**
 
-**Required** : `url`
+- **Required** : `url`
 
-**Required** : `user_id`
+- **Required** : `user_id`
 
 
 `POST /url`
@@ -129,6 +129,6 @@ Request Body:
 
 **URL Params**
 
-**Required** : `user_id`
+- **Required** : `user_id`
 
 `DELETE /url?id=87481c71-aeb1-49ba-9062-6d87eb5d94a0`
