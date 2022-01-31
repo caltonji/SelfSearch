@@ -42,6 +42,8 @@ type PostUrlBody struct {
 
 type Url struct {
 	Url string `json:"url" binding:"required"`
+	Title string `json:"title" binding:"required"`
+	Image string `json:"image" binding:"required"`
 	Id  string `json:"id" binding:"required"`
 }
 
@@ -95,7 +97,9 @@ func getUrls(c *gin.Context) {
 		}
 		data := doc.Data()
 		urls = append(urls, Url{
-			Url: data["user_id"].(string),
+			Url: data["url"]?.(string),
+			Title: data["title"].(string),
+			Image:  data["image"].(string),
 			Id:  data["id"].(string),
 		})
 	}
@@ -115,13 +119,22 @@ func postUrl(c *gin.Context) {
 	client := createClient(ctx)
 	defer client.Close()
 
-	// todo: scrape the website
+	// scrape the website
+	result, err := scrape(postUrlBody.Url)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
 	// save the content
 	id := uuid.New().String()
-	_, err := client.Collection("urls").Doc(id).Set(ctx, map[string]interface{}{
+	_, err = client.Collection("urls").Doc(id).Set(ctx, map[string]interface{}{
 		"id":      id,
 		"user_id": postUrlBody.UserId,
 		"url":     postUrlBody.Url,
+		"title":   result.Title,
+		"image":   result.Image,
+		"content": result.Content,
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
